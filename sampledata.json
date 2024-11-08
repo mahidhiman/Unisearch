@@ -1,0 +1,262 @@
+[
+  {
+    "UniversityId": "U006",
+    "UniversityName": "University of Edinburgh",
+    "CourseName": "Chemistry",
+    "CourseID": "CHEM106",
+    "EntryRequirements": "A-levels: AAB, TOEFL: 100+, IELTS: 7.0",
+    "createdOn": "2023-10-01",
+    "CourseLevel": "Undergraduate",
+    "UniversityWebsite": "https://www.ed.ac.uk/studying/undergraduate/degrees/index.php?action=view&code=F100"
+  },
+  {
+    "UniversityId": "U007",
+    "UniversityName": "University of Manchester",
+    "CourseName": "Biology",
+    "CourseID": "BIO107",
+    "EntryRequirements": "A-levels: AAA, TOEFL: 100+, IELTS: 7.0",
+    "createdOn": "2023-10-01",
+    "CourseLevel": "Undergraduate",
+    "UniversityWebsite": "https://www.manchester.ac.uk/study/undergraduate/courses/2023/00571/bsc-biology/"
+  },
+  {
+    "UniversityId": "U008",
+    "UniversityName": "University of Bristol",
+    "CourseName": "Economics",
+    "CourseID": "ECON108",
+    "EntryRequirements": "A-levels: A*AA, TOEFL: 100+, IELTS: 7.0",
+    "createdOn": "2023-10-01",
+    "CourseLevel": "Undergraduate",
+    "UniversityWebsite": "https://www.bristol.ac.uk/study/undergraduate/2023/economics/bsc-economics/"
+  },
+  {
+    "UniversityId": "U009",
+    "UniversityName": "University of Warwick",
+    "CourseName": "History",
+    "CourseID": "HIST109",
+    "EntryRequirements": "A-levels: AAA, TOEFL: 100+, IELTS: 7.0",
+    "createdOn": "2023-10-01",
+    "CourseLevel": "Undergraduate",
+    "UniversityWebsite": "https://warwick.ac.uk/study/undergraduate/courses-2023/history/"
+  },
+  {
+    "UniversityId": "U010",
+    "UniversityName": "University of Glasgow",
+    "CourseName": "Philosophy",
+    "CourseID": "PHIL110",
+    "EntryRequirements": "A-levels: AAB, TOEFL: 100+, IELTS: 7.0",
+    "createdOn": "2023-10-01",
+    "CourseLevel": "Undergraduate",
+    "UniversityWebsite": "https://www.gla.ac.uk/undergraduate/degrees/philosophy/"
+  },
+  {
+    "UniversityId": "U011",
+    "UniversityName": "University of Leeds",
+    "CourseName": "Mathematics",
+    "CourseID": "MATH111",
+    "EntryRequirements": "A-levels: AAB, TOEFL: 100+, IELTS: 7.0",
+    "createdOn": "2023-10-01",
+    "CourseLevel": "Undergraduate",
+    "UniversityWebsite": "https://courses.leeds.ac.uk/i200/mathematics-bsc"
+  },
+  {
+    "UniversityId": "U012",
+    "UniversityName": "University of Birmingham",
+    "CourseName": "Physics",
+    "CourseID": "PHYS112",
+    "EntryRequirements": "A-levels: AAA, TOEFL: 100+, IELTS: 7.0",
+    "createdOn": "2023-10-01",
+    "CourseLevel": "Undergraduate",
+    "UniversityWebsite": "https://www.birmingham.ac.uk/undergraduate/courses/physics/physics-bsc.aspx"
+  },
+  {
+    "UniversityId": "U013",
+    "UniversityName": "University of Liverpool",
+    "CourseName": "Computer Science",
+    "CourseID": "CS113",
+    "EntryRequirements": "A-levels: AAB, TOEFL: 100+, IELTS: 7.0",
+    "createdOn": "2023-10-01",
+    "CourseLevel": "Undergraduate",
+    "UniversityWebsite": "https://www.liverpool.ac.uk/study/undergraduate/courses/computer-science-bsc-hons/"
+  },
+  {
+    "UniversityId": "U014",
+    "UniversityName": "University of Sheffield",
+    "CourseName": "Engineering",
+    "CourseID": "ENG114",
+    "EntryRequirements": "A-levels: AAA, TOEFL: 100+, IELTS: 7.0",
+    "createdOn": "2023-10-01",
+    "CourseLevel": "Undergraduate",
+    "UniversityWebsite": "https://www.sheffield.ac.uk/undergraduate/courses/2023/engineering-beng"
+  },
+  {
+    "UniversityId": "U015",
+    "UniversityName": "University of Nottingham",
+    "CourseName": "Science",
+    "CourseID": "SCI115",
+    "EntryRequirements": "A-levels: A*AA, TOEFL: 100+, IELTS: 7.0",
+    "createdOn": "2023-10-01",
+    "CourseLevel": "Undergraduate",
+    "UniversityWebsite": "https://www.nottingham.ac.uk/ugstudy/course/Science"
+  },
+  {
+    "UniversityId": "U016",
+    "UniversityName": "University of Southampton",
+    "CourseName": "Law",
+    "CourseID": "LAW116",
+    "EntryRequirements": "A-levels: AAB, TOEFL: 100+, IELTS: 7.0",
+    "createdOn": "2023-10-01",
+    "CourseLevel": "Undergraduate",
+    "UniversityWebsite": "https://www.southampton.ac.uk/courses/law-degree-llb"
+  },
+  {
+    "UniversityId": "U017",
+    "UniversityName": "University of Exeter",
+    "CourseName": "Psychology",
+    "CourseID": "PSY117",
+    "EntryRequirements": "A-levels: AAB, TOEFL: 100+, IELTS: 7.0",
+    "createdOn": "2023-10-01",
+    "CourseLevel": "Undergraduate",
+    "UniversityWebsite": "https://www.exeter.ac.uk/undergraduate/courses/psychology/psychology/"
+  },
+  {
+    "UniversityId": "U018",
+    "UniversityName": "University of York",
+    "CourseName": "Sociology",
+    "CourseID": "SOC118",
+    "EntryRequirements": "A-levels: AAB, TOEFL: 100+, IELTS: 7.0",
+    "createdOn": "2023-10-01",
+    "CourseLevel": "Undergraduate",
+    "UniversityWebsite": "https://www.york.ac.uk/study/undergraduate/courses/ba-sociology/"
+  },
+  {
+    "UniversityId": "U019",
+    "UniversityName": "University of St Andrews",
+    "CourseName": "Architecture",
+    "CourseID": "ARCH119",
+    "EntryRequirements": "A-levels: AAA, TOEFL: 100+, IELTS: 7.0",
+    "createdOn": "2023-10-01",
+    "CourseLevel": "Undergraduate",
+    "UniversityWebsite": "https://www.st-andrews.ac.uk/subjects/architecture/"
+  },
+  {
+    "UniversityId": "U020",
+    "UniversityName": "University of Aberdeen",
+    "CourseName": "Philosophy",
+    "CourseID": "PHIL120",
+    "EntryRequirements": "A-levels: AAB, TOEFL: 100+, IELTS: 7.0",
+    "createdOn": "2023-10-01",
+    "CourseLevel": "Undergraduate",
+    "UniversityWebsite": "https://www.abdn.ac.uk/study/undergraduate/degree-programmes/832/philosophy/"
+  },
+  {
+    "UniversityId": "U021",
+    "UniversityName": "University of Dundee",
+    "CourseName": "Geography",
+    "CourseID": "GEO121",
+    "EntryRequirements": "A-levels: AAB, TOEFL: 100+, IELTS: 7.0",
+    "createdOn": "2023-10-01",
+    "CourseLevel": "Undergraduate",
+    "UniversityWebsite": "https://www.dundee.ac.uk/undergraduate/geography"
+  },
+  {
+    "UniversityId": "U022",
+    "UniversityName": "University of Sussex",
+    "CourseName": "Art History",
+    "CourseID": "ARTH122",
+    "EntryRequirements": "A-levels: AAB, TOEFL: 100+, IELTS: 7.0",
+    "createdOn": "2023-10-01",
+    "CourseLevel": "Undergraduate",
+    "UniversityWebsite": "https://www.sussex.ac.uk/study/undergraduate/courses/art-history-ba"
+  },
+  {
+    "UniversityId": "U023",
+    "UniversityName": "University of Reading",
+    "CourseName": "Media Studies",
+    "CourseID": "MEDIA123",
+    "EntryRequirements": "A-levels: AAB, TOEFL: 100+, IELTS: 7.0",
+    "createdOn": "2023-10-01",
+    "CourseLevel": "Undergraduate",
+    "UniversityWebsite": "https://www.reading.ac.uk/ready-to-study/study/subject-area/media-and-communications-ug"
+  },
+  {
+    "UniversityId": "U024",
+    "UniversityName": "University of Leicester",
+    "CourseName": "Agriculture",
+    "CourseID": "AGRI124",
+    "EntryRequirements": "A-levels: AAB, TOEFL: 100+, IELTS: 7.0",
+    "createdOn": "2023-10-01",
+    "CourseLevel": "Undergraduate",
+    "UniversityWebsite": "https://le.ac.uk/courses/agriculture-bsc"
+  },
+  {
+    "UniversityId": "U025",
+    "UniversityName": "University of Surrey",
+    "CourseName": "Criminology",
+    "CourseID": "CRIM125",
+    "EntryRequirements": "A-levels: AAB, TOEFL: 100+, IELTS: 7.0",
+    "createdOn": "2023-10-01",
+    "CourseLevel": "Undergraduate",
+    "UniversityWebsite": "https://www.surrey.ac.uk/undergraduate/criminology"
+  },
+  {
+    "UniversityId": "U026",
+    "UniversityName": "University of East Anglia",
+    "CourseName": "Veterinary Medicine",
+    "CourseID": "VET126",
+    "EntryRequirements": "A-levels: A*AA, TOEFL: 100+, IELTS: 7.0",
+    "createdOn": "2023-10-01",
+    "CourseLevel": "Undergraduate",
+    "UniversityWebsite": "https://www.uea.ac.uk/course/undergraduate/bvsc-veterinary-medicine"
+  },
+  {
+    "UniversityId": "U027",
+    "UniversityName": "University of Kent",
+    "CourseName": "Environmental Science",
+    "CourseID": "ENV127",
+    "EntryRequirements": "A-levels: AAB, TOEFL: 100+, IELTS: 7.0",
+    "createdOn": "2023-10-01",
+    "CourseLevel": "Undergraduate",
+    "UniversityWebsite": "https://www.kent.ac.uk/courses/undergraduate/2023/202/environmental-science"
+  },
+  {
+    "UniversityId": "U028",
+    "UniversityName": "University of Lancaster",
+    "CourseName": "Anthropology",
+    "CourseID": "ANTH128",
+    "EntryRequirements": "A-levels: AAB, TOEFL: 100+, IELTS: 7.0",
+    "createdOn": "2023-10-01",
+    "CourseLevel": "Undergraduate",
+    "UniversityWebsite": "https://www.lancaster.ac.uk/study/undergraduate/courses/anthropology-ba-hons-l600/"
+  },
+  {
+    "UniversityId": "U029",
+    "UniversityName": "University of Essex",
+    "CourseName": "Linguistics",
+    "CourseID": "LING129",
+    "EntryRequirements": "A-levels: AAB, TOEFL: 100+, IELTS: 7.0",
+    "createdOn": "2023-10-01",
+    "CourseLevel": "Undergraduate",
+    "UniversityWebsite": "https://www.essex.ac.uk/courses/ug00068/1/ba-linguistics"
+  },
+  {
+    "UniversityId": "U030",
+    "UniversityName": "University of Bath",
+    "CourseName": "Political Science",
+    "CourseID": "POL130",
+    "EntryRequirements": "A-levels: AAB, TOEFL: 100+, IELTS: 7.0",
+    "createdOn": "2023-10-01",
+    "CourseLevel": "Undergraduate",
+    "UniversityWebsite": "https://www.bath.ac.uk/courses/undergraduate-2023/political-science/"
+  },
+  {
+    "UniversityId": "U031",
+    "UniversityName": "University of Bath",
+    "CourseName": "Medicine",
+    "CourseID": "MED131",
+    "EntryRequirements": "A-levels: A*AA, TOEFL: 100+, IELTS: 7.0",
+    "createdOn": "2023-10-01",
+    "CourseLevel": "Undergraduate",
+    "UniversityWebsite": "https://www.bath.ac.uk/courses/undergraduate-2023/medicine/"
+  }
+]
