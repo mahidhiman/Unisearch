@@ -1,17 +1,18 @@
 const http = require("http");
 const url = require("url");
-const routes = require("./routes");
+const { handlers } = require("./routes");
 const stringDecoder = require("string_decoder").StringDecoder;
 const querystring = require("querystring");
 
 // Define the router with available routes
 let router = {
-  course: routes.course,
-  notFound: routes.notFound,
-  universities: routes.universities,
-  ielts: routes.ielts,
-  pte: routes.pte,
-  requirements: routes.requirements,
+  course: handlers.course,
+  notFound: handlers.notFound,
+  universities: handlers.universities,
+  ielts: handlers.ielts,
+  pte: handlers.pte,
+  requirements: handlers.requirements,
+  allUniversities: handlers.allUniversities,
 };
 
 /**

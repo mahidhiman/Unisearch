@@ -34,7 +34,7 @@ const createHandler = (entity, validateInput) => ({
       return;
     }
     database[`create${entity}`](payload, (err, id) => {
-      handleDatabaseResponse(err, { id }, callback, `${entity} created successfully`);
+      handleDatabaseResponse(err, id, callback, `${entity} created successfully`);
     });
   },
   get: (data, callback) => {
@@ -44,7 +44,7 @@ const createHandler = (entity, validateInput) => ({
       return;
     }
     database[`get${entity}ById`](id, (err, result) => {
-      handleDatabaseResponse(err, { result }, callback, `${entity} retrieved successfully`);
+      handleDatabaseResponse(err, result, callback, `${entity} retrieved successfully`);
     });
   },
   put: (data, callback) => {
@@ -85,11 +85,22 @@ handlers._universities = createHandler(
   ({ name, country, campusName, city }) => name && country && campusName && city
 );
 
-// Define course handlers
+// Define courses handlers, fetch all courses
 handlers.courses = (data, callback) => {
   if (data.method === "get") {
     database.getAllUniversities((err, universities) => {
       handleDatabaseResponse(err, { universities }, callback, "Universities retrieved successfully");
+    });
+  } else {
+    callback(405);
+  }
+};
+
+// Define universities handler, fetch all universities
+handlers.allUniversities = (data, callback) => {
+  if (data.method === "get") {
+    database.getAllUniversities((err, universities) => {
+      handleDatabaseResponse(err, universities, callback, "Universities retrieved successfully");
     });
   } else {
     callback(405);
