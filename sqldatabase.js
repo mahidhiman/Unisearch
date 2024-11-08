@@ -92,8 +92,7 @@ db.serialize(() => {
         user_id INTEGER,
         email TEXT NOT NULL,
         phone TEXT NOT NULL,
-        FOREIGN KEY (user_id) REFERENCES users(id),
-        FOREIGN KEY (course_id) REFERENCES course(id)
+        FOREIGN KEY (user_id) REFERENCES users(id)
     )`);
 });
 
