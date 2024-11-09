@@ -1,2 +1,4 @@
 sqldatabase.js
 university.db
+.env
+config.json

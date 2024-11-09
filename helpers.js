@@ -1,9 +1,10 @@
 // validating user inputs for registration
-const validateUserInput = (name, email, password) => {
+const validateUserInput = ({ name, email, password, role }) => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  console.log("validation ran for user input");
   //check if all fields are strings and not empty and email is valid and password is at least 6 characters long
   return (
-    [name, email, password].every((field) => typeof field === "string" && field.trim().length > 0) &&
+    [name, email, password, role].every((field) => typeof field === "string" && field.trim().length > 0) &&
     emailRegex.test(email) &&
     password.trim().length >= 6
   );
@@ -14,6 +15,7 @@ const validateId = (id) => id && typeof id === "string" && id.trim().length > 0;
 
 //validating fields for put requests
 const validateFields = (fields) => {
+  console.log("fields", "validation ran");
   const validFields = {};
   //filter out fields with empty strings or zeros
   for (const [key, value] of Object.entries(fields)) {

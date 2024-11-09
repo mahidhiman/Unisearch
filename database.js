@@ -3,6 +3,8 @@
  */
 
 const sqlite3 = require("sqlite3").verbose();
+const helpers = require("./helpers");
+const bcrypt = require("bcrypt");
 const db = new sqlite3.Database("university.db", (err) => {
   if (err) {
     console.error("Could not connect to database", err);
@@ -207,6 +209,36 @@ const deleteRequirement = (id, callback) => {
   runQuery("DELETE FROM requirements WHERE id = ?", [id], callback);
 };
 
+const createUser = (user, callback) => {
+  if (!helpers.validateUserInput(user)) callback(new Error("Invalid user input", 0));
+
+  const hashedPassword = bcrypt.hashSync(user.password, 10);
+  runQuery(
+    "INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)",
+    [user.name, user.email, hashedPassword, user.role],
+    callback
+  );
+};
+
+const deleteUser = (id, callback) => {
+  runQuery("DELETE FROM users WHERE id = ?", [id], callback);
+};
+
+const updateUser = (id, user, callback) => {
+  if (!helpers.validateUserInput(user)) callback(new Error("Invalid user input", 0));
+
+  const hashedPassword = bcrypt.hashSync(user.password, 10);
+  runQuery(
+    "UPDATE users SET name = ?, email = ?, password = ?, role = ? WHERE id = ?",
+    [user.name, user.email, hashedPassword, user.role, id],
+    callback
+  );
+};
+
+const getUserByEmail = (email, callback) => {
+  getQuery("SELECT * FROM users WHERE email = ?", [email], callback);
+};
+
 module.exports = {
   createUniversity,
   getUniversityById,
@@ -230,4 +262,8 @@ module.exports = {
   getRequirementById,
   updateRequirement,
   deleteRequirement,
+  createUser,
+  deleteUser,
+  updateUser,
+  getUserByEmail,
 };

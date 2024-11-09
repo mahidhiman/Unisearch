@@ -8,11 +8,14 @@ const querystring = require("querystring");
 let router = {
   course: handlers.course,
   notFound: handlers.notFound,
-  universities: handlers.universities,
+  universities: handlers.university,
   ielts: handlers.ielts,
   pte: handlers.pte,
   requirements: handlers.requirements,
   allUniversities: handlers.allUniversities,
+  users: handlers.users,
+  login: handlers.login,
+  logout: handlers.logout,
 };
 
 /**
