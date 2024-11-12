@@ -1,102 +1,230 @@
-/**
- * @fileoverview This module provides functions to interact with a SQLite database for managing universities and courses.
- */
-
 const sqlite3 = require("sqlite3").verbose();
 const helpers = require("./helpers");
 const bcrypt = require("bcrypt");
+
+// Initialize the database connection
 const db = new sqlite3.Database("university.db", (err) => {
-  if (err) {
-    console.error("Could not connect to database", err);
-  }
+  if (err) console.error("Could not connect to database", err);
 });
 
+// Validate required fields in an object
 const validateFields = (object, requiredFields) => {
   const missingFields = requiredFields.filter((field) => !object[field]);
-  return missingFields.length > 0 ? `Missing fields: ${missingFields.join(", ")}` : null;
+  return missingFields.length ? `Missing fields: ${missingFields.join(", ")}` : null;
 };
 
+// Validate IELTS scores
 const validateIelts = (ielts) => {
-  const requiredFields = ["course_id", "reading", "writing", "listening", "speaking", "overall"];
+  const requiredFields = ["reading", "writing", "listening", "speaking", "overall"];
   const validationError = validateFields(ielts, requiredFields);
   if (validationError) return validationError;
-
-  const scores = [ielts.reading, ielts.writing, ielts.listening, ielts.speaking, ielts.overall];
-  return scores.some((score) => score < 1.0 || score > 9.0) ? "IELTS scores must be between 1.0 and 9.0" : null;
+  return [ielts.reading, ielts.writing, ielts.listening, ielts.speaking, ielts.overall].some(
+    (score) => score < 1.0 || score > 9.0
+  )
+    ? "IELTS scores must be between 1.0 and 9.0"
+    : null;
 };
 
+// Validate PTE scores
 const validatePte = (pte) => {
-  const requiredFields = ["course_id", "reading", "writing", "listening", "speaking", "overall"];
+  const requiredFields = ["reading", "writing", "listening", "speaking", "overall"];
   const validationError = validateFields(pte, requiredFields);
   if (validationError) return validationError;
-
-  const scores = [pte.reading, pte.writing, pte.listening, pte.speaking, pte.overall];
-  return scores.some((score) => score < 10 || score > 90) ? "PTE scores must be between 10 and 90" : null;
+  return [pte.reading, pte.writing, pte.listening, pte.speaking, pte.overall].some((score) => score < 10 || score > 90)
+    ? "PTE scores must be between 10 and 90"
+    : null;
 };
 
+// Validate university details
 const validateUniversity = (university) => {
-  const requiredFields = ["name", "country", "campusName", "city"];
-  return validateFields(university, requiredFields);
+  const requiredFields = [
+    "name",
+    "country",
+    "campusName",
+    "city",
+    "scholarships",
+    "description",
+    "image",
+    "rank",
+    "MOI_Accepted",
+    "IELTS_waiver",
+  ];
+  const validationError = validateFields(university, requiredFields);
+  if (validationError) return validationError;
+
+  if (!/^\d+$/.test(university.scholarships)) return "Scholarships must be a number";
+  if (!/^\d+$/.test(university.rank)) return "Rank must be a number";
+  if (!/^https?:\/\/.+\..+/.test(university.image)) return "Image must be a valid URL";
+  if (!["yes", "no"].includes(university.MOI_Accepted)) return "MOI_Accepted must be 'yes' or 'no'";
+  if (!["yes", "no"].includes(university.IELTS_waiver)) return "IELTS_waiver must be 'yes' or 'no'";
+
+  return null;
 };
 
-const validateCourse = (course) => {
-  const requiredFields = ["university_id", "name", "description", "duration", "credits"];
-  return validateFields(course, requiredFields);
-};
+// Placeholder for course validation logic
+const validateCourse = (course) => true;
 
-const runQuery = (sql, params, callback) => {
+// Execute a SQL query that modifies data
+const runQuery = (sql, params, callback) =>
   db.run(sql, params, function (err) {
     if (err) return callback(err);
     callback(null, { id: this.lastID, changes: this.changes });
   });
-};
 
-const getQuery = (sql, params, callback) => {
+// Execute a SQL query that retrieves a single row
+const getQuery = (sql, params, callback) =>
   db.get(sql, params, (err, row) => {
     if (err) return callback(err);
     callback(null, row);
   });
-};
 
-const allQuery = (sql, params, callback) => {
+// Execute a SQL query that retrieves multiple rows
+const allQuery = (sql, params, callback) =>
   db.all(sql, params, (err, rows) => {
     if (err) return callback(err);
     callback(null, rows);
   });
-};
 
+// Create a new university record
 const createUniversity = (university, callback) => {
   const validationError = validateUniversity(university);
   if (validationError) return callback(new Error(validationError));
-
-  const sql = "INSERT INTO university (name, country, campus_name, city) VALUES (?, ?, ?, ?)";
-  runQuery(sql, [university.name, university.country, university.campusName, university.city], callback);
+  runQuery(
+    "INSERT INTO university (name, country, campus_name, city, scholarships, description, image, rank, MOI_Accepted, IELTS_waiver) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+    [
+      university.name,
+      university.country,
+      university.campusName,
+      university.city,
+      university.scholarships,
+      university.description,
+      university.image,
+      university.rank,
+      university.MOI_Accepted,
+      university.IELTS_waiver,
+    ],
+    callback
+  );
 };
 
-const getUniversityById = (id, callback) => {
-  getQuery("SELECT * FROM university WHERE id = ?", [id], callback);
-};
-
+// Update an existing university record
 const updateUniversity = (id, university, callback) => {
   const validationError = validateUniversity(university);
   if (validationError) return callback(new Error(validationError));
-
-  const sql = "UPDATE university SET name = ?, country = ?, campus_name = ?, city = ? WHERE id = ?";
-  runQuery(sql, [university.name, university.country, university.campusName, university.city, id], callback);
+  runQuery(
+    "UPDATE university SET name = ?, country = ?, campus_name = ?, city = ?, scholarships = ?, description = ?, image = ?, rank = ?, MOI_Accepted = ?, IELTS_waiver = ? WHERE id = ?",
+    [
+      university.name,
+      university.country,
+      university.campusName,
+      university.city,
+      university.scholarships,
+      university.description,
+      university.image,
+      university.rank,
+      university.MOI_Accepted,
+      university.IELTS_waiver,
+      id,
+    ],
+    callback
+  );
 };
 
-const deleteUniversity = (id, callback) => {
-  runQuery("DELETE FROM university WHERE id = ?", [id], callback);
-};
-
+// Create a new course record
 const createCourse = (course, callback) => {
   const validationError = validateCourse(course);
   if (validationError) return callback(new Error(validationError));
-
-  const sql = "INSERT INTO courses (university_id, name, description, duration, credits) VALUES (?, ?, ?, ?, ?)";
-  runQuery(sql, [course.university_id, course.name, course.description, course.duration, course.credits], callback);
+  runQuery(
+    "INSERT INTO courses (university_id, name, requirement_id, fees, duration, intake, link) VALUES (?, ?, ?, ?, ?, ?, ?)",
+    [course.university_id, course.name, course.requirement_id, course.fees, course.duration, course.intake, course.link],
+    callback
+  );
 };
 
+// Update an existing course record
+const updateCourse = (id, course, callback) => {
+  const validationError = validateCourse(course);
+  if (validationError) return callback(new Error(validationError));
+  runQuery(
+    "UPDATE courses SET university_id = ?, name = ?, description = ?, duration = ?, credits = ? WHERE id = ?",
+    [course.university_id, course.name, course.description, course.duration, course.credits, id],
+    callback
+  );
+};
+
+// Create a new IELTS record
+const createIelts = (ielts, callback) => {
+  const validationError = validateIelts(ielts);
+  if (validationError) return callback(new Error(validationError));
+  runQuery(
+    "INSERT INTO ielts (reading, writing, listening, speaking, overall) VALUES (?, ?, ?, ?, ?)",
+    [ielts.reading, ielts.writing, ielts.listening, ielts.speaking, ielts.overall],
+    callback
+  );
+};
+
+// Update an existing IELTS record
+const updateIelts = (id, ielts, callback) => {
+  const validationError = validateIelts(ielts);
+  if (validationError) return callback(new Error(validationError));
+  runQuery(
+    "UPDATE ielts SET reading = ?, writing = ?, listening = ?, speaking = ?, overall = ? WHERE id = ?",
+    [ielts.reading, ielts.writing, ielts.listening, ielts.speaking, ielts.overall, id],
+    callback
+  );
+};
+
+// Create a new PTE record
+const createPte = (pte, callback) => {
+  const validationError = validatePte(pte);
+  if (validationError) return callback(new Error(validationError));
+  runQuery(
+    "INSERT INTO pte (reading, writing, listening, speaking, overall) VALUES (?, ?, ?, ?, ?)",
+    [pte.reading, pte.writing, pte.listening, pte.speaking, pte.overall],
+    callback
+  );
+};
+
+// Update an existing PTE record
+const updatePte = (id, pte, callback) => {
+  const validationError = validatePte(pte);
+  if (validationError) return callback(new Error(validationError));
+  runQuery(
+    "UPDATE pte SET reading = ?, writing = ?, listening = ?, speaking = ?, overall = ? WHERE id = ?",
+    [pte.reading, pte.writing, pte.listening, pte.speaking, pte.overall, id],
+    callback
+  );
+};
+
+// Create a new user record
+const createUser = (user, callback) => {
+  if (!helpers.validateUserInput(user)) callback(new Error("Invalid user input", 0));
+  const hashedPassword = bcrypt.hashSync(user.password, 10);
+  runQuery(
+    "INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)",
+    [user.name, user.email, hashedPassword, user.role],
+    callback
+  );
+};
+
+// Update an existing user record
+const updateUser = (id, user, callback) => {
+  if (!helpers.validateUserInput(user)) callback(new Error("Invalid user input", 0));
+  const hashedPassword = bcrypt.hashSync(user.password, 10);
+  runQuery(
+    "UPDATE users SET name = ?, email = ?, password = ?, role = ? WHERE id = ?",
+    [user.name, user.email, hashedPassword, user.role, id],
+    callback
+  );
+};
+
+// Delete an entity by ID
+const deleteEntity = (table, id, callback) => runQuery(`DELETE FROM ${table} WHERE id = ?`, [id], callback);
+
+// Get an entity by ID
+const getEntityById = (table, id, callback) => getQuery(`SELECT * FROM ${table} WHERE id = ?`, [id], callback);
+
+// Get all courses with related university and requirement details
 const getCourses = (callback) => {
   const sql = `
     SELECT 
@@ -123,147 +251,32 @@ const getCourses = (callback) => {
   allQuery(sql, [], callback);
 };
 
-const getCourseById = (id, callback) => {
-  getQuery("SELECT * FROM courses WHERE id = ?", [id], callback);
-};
+// Search for courses by name
+const searchCourse = (name, callback) => allQuery("SELECT * FROM courses WHERE name LIKE ?", ["%" + name + "%"], callback);
 
-const updateCourse = (id, course, callback) => {
-  const validationError = validateCourse(course);
-  if (validationError) return callback(new Error(validationError));
-
-  const sql = "UPDATE courses SET university_id = ?, name = ?, description = ?, duration = ?, credits = ? WHERE id = ?";
-  runQuery(sql, [course.university_id, course.name, course.description, course.duration, course.credits, id], callback);
-};
-
-const deleteCourse = (id, callback) => {
-  runQuery("DELETE FROM courses WHERE id = ?", [id], callback);
-};
-
-const getAllUniversities = (callback) => {
-  allQuery("SELECT * FROM university", [], callback);
-};
-
-const createIelts = (ielts, callback) => {
-  const validationError = validateIelts(ielts);
-  if (validationError) return callback(new Error(validationError));
-
-  const sql = "INSERT INTO ielts (course_id, reading, writing, listening, speaking, overall) VALUES (?, ?, ?, ?, ?, ?)";
-  runQuery(sql, [ielts.course_id, ielts.reading, ielts.writing, ielts.listening, ielts.speaking, ielts.overall], callback);
-};
-
-const getIeltsById = (id, callback) => {
-  getQuery("SELECT * FROM ielts WHERE id = ?", [id], callback);
-};
-
-const updateIelts = (id, ielts, callback) => {
-  const validationError = validateIelts(ielts);
-  if (validationError) return callback(new Error(validationError));
-
-  const sql = "UPDATE ielts SET course_id = ?, reading = ?, writing = ?, listening = ?, speaking = ?, overall = ? WHERE id = ?";
-  runQuery(sql, [ielts.course_id, ielts.reading, ielts.writing, ielts.listening, ielts.speaking, ielts.overall, id], callback);
-};
-
-const deleteIelts = (id, callback) => {
-  runQuery("DELETE FROM ielts WHERE id = ?", [id], callback);
-};
-
-const createPte = (pte, callback) => {
-  const validationError = validatePte(pte);
-  if (validationError) return callback(new Error(validationError));
-
-  const sql = "INSERT INTO pte (course_id, reading, writing, listening, speaking, overall) VALUES (?, ?, ?, ?, ?, ?)";
-  runQuery(sql, [pte.course_id, pte.reading, pte.writing, pte.listening, pte.speaking, pte.overall], callback);
-};
-
-const getPteById = (id, callback) => {
-  getQuery("SELECT * FROM pte WHERE id = ?", [id], callback);
-};
-
-const updatePte = (id, pte, callback) => {
-  const validationError = validatePte(pte);
-  if (validationError) return callback(new Error(validationError));
-
-  const sql = "UPDATE pte SET course_id = ?, reading = ?, writing = ?, listening = ?, speaking = ?, overall = ? WHERE id = ?";
-  runQuery(sql, [pte.course_id, pte.reading, pte.writing, pte.listening, pte.speaking, pte.overall, id], callback);
-};
-
-const deletePte = (id, callback) => {
-  runQuery("DELETE FROM pte WHERE id = ?", [id], callback);
-};
-
-const createRequirement = (requirement, callback) => {
-  const sql = "INSERT INTO requirements (course_id, requirement) VALUES (?, ?)";
-  runQuery(sql, [requirement.course_id, requirement.requirement], callback);
-};
-
-const getRequirementById = (id, callback) => {
-  getQuery("SELECT * FROM requirements WHERE id = ?", [id], callback);
-};
-
-const updateRequirement = (id, requirement, callback) => {
-  const sql = "UPDATE requirements SET course_id = ?, requirement = ? WHERE id = ?";
-  runQuery(sql, [requirement.course_id, requirement.requirement, id], callback);
-};
-
-const deleteRequirement = (id, callback) => {
-  runQuery("DELETE FROM requirements WHERE id = ?", [id], callback);
-};
-
-const createUser = (user, callback) => {
-  if (!helpers.validateUserInput(user)) callback(new Error("Invalid user input", 0));
-
-  const hashedPassword = bcrypt.hashSync(user.password, 10);
-  runQuery(
-    "INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)",
-    [user.name, user.email, hashedPassword, user.role],
-    callback
-  );
-};
-
-const deleteUser = (id, callback) => {
-  runQuery("DELETE FROM users WHERE id = ?", [id], callback);
-};
-
-const updateUser = (id, user, callback) => {
-  if (!helpers.validateUserInput(user)) callback(new Error("Invalid user input", 0));
-
-  const hashedPassword = bcrypt.hashSync(user.password, 10);
-  runQuery(
-    "UPDATE users SET name = ?, email = ?, password = ?, role = ? WHERE id = ?",
-    [user.name, user.email, hashedPassword, user.role, id],
-    callback
-  );
-};
-
-const getUserByEmail = (email, callback) => {
-  getQuery("SELECT * FROM users WHERE email = ?", [email], callback);
-};
-
+// Export functions for external use
 module.exports = {
   createUniversity,
-  getUniversityById,
+  getUniversityById: (id, callback) => getEntityById("university", id, callback),
   updateUniversity,
-  deleteUniversity,
+  deleteUniversity: (id, callback) => deleteEntity("university", id, callback),
   createCourse,
   getCourses,
-  getCourseById,
+  getCourseById: (id, callback) => getEntityById("courses", id, callback),
   updateCourse,
-  deleteCourse,
-  getAllUniversities,
+  deleteCourse: (id, callback) => deleteEntity("courses", id, callback),
+  getAllUniversities: (callback) => allQuery("SELECT * FROM university", [], callback),
   createIelts,
-  getIeltsById,
+  getIeltsById: (id, callback) => getEntityById("ielts", id, callback),
   updateIelts,
-  deleteIelts,
+  deleteIelts: (id, callback) => deleteEntity("ielts", id, callback),
   createPte,
-  getPteById,
+  getPteById: (id, callback) => getEntityById("pte", id, callback),
   updatePte,
-  deletePte,
-  createRequirement,
-  getRequirementById,
-  updateRequirement,
-  deleteRequirement,
+  deletePte: (id, callback) => deleteEntity("pte", id, callback),
   createUser,
-  deleteUser,
+  deleteUser: (id, callback) => deleteEntity("users", id, callback),
   updateUser,
-  getUserByEmail,
+  searchCourse,
+  getUserByEmail: (email, callback) => getQuery("SELECT * FROM users WHERE email = ?", [email], callback),
 };

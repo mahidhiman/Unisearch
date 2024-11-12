@@ -82,7 +82,7 @@ const handleRoute = (data, callback, subHandlers) => {
 const createHandler = (entity, validateInput) => ({
   post: (data, callback) => {
     const payload = data.payload || {};
-    console.log(validateInput(payload));
+    console.log(validateInput, validateInput(payload), payload, "hello world");
     if (!validateInput(payload)) return callback(400, { message: "Invalid input" });
     database[`create${entity}`](payload, (err, id) =>
       handleDatabaseResponse(err, id, callback, `${entity} created successfully`)
@@ -132,7 +132,8 @@ handlers.root = (data, callback) => {
 handlers.university = (data, callback) => handleRoute(data, callback, handlers._universities);
 handlers._universities = createHandler(
   "University",
-  ({ name, country, campusName, city }) => name && country && campusName && city
+  ({ name, country, campus_name, city, scholarships, description, image, rank, MOI_Accepted, IELTS_waiver }) =>
+    name && country && campus_name && city && scholarships && description && image && rank && MOI_Accepted && IELTS_waiver
 );
 
 // Define the users route handler
@@ -148,10 +149,7 @@ handlers._course = createHandler("Course", helpers.validateFields);
 // Define the requirements route handler
 // It delegates the request to the appropriate method handler in handlers._requirements
 handlers.requirements = (data, callback) => handleRoute(data, callback, handlers._requirements);
-handlers._requirements = createHandler(
-  "Requirements",
-  ({ course_id, requirement, ielts_id, pte_id }) => course_id && requirement && ielts_id && pte_id
-);
+handlers._requirements = createHandler("Requirements", ({ requirement, ielts_id, pte_id }) => requirement && ielts_id && pte_id);
 
 // Define the IELTS route handler
 // It delegates the request to the appropriate method handler in handlers._ielts
@@ -182,9 +180,38 @@ handlers.allUniversities = (data, callback) => {
   }
 };
 
+// Define the search courses route handler
+// It handles searching courses by name
+handlers.searchCourses = (data, callback) => {
+  if (data.method === "get") {
+    const name = data.queryStringObject.name;
+    if (!name) return callback(400, { message: "Missing course name" });
+
+    database.searchCoursesByName(name, (err, courses) => {
+      if (err) return callback(500, { message: "Error: " + err.message });
+      callback(200, courses);
+    });
+  } else {
+    callback(405);
+  }
+};
+
 // Define the not found route handler
 // It returns a 404 Not Found response for any unmatched routes
 handlers.notFound = (data, callback) => callback(404, { message: "Not found" });
+
+//Define the allCourses route
+//it returns all the courses available in the database
+handlers.allCourses = (data, callback) => {
+  if (data.method === "get") {
+    database.getCourses((err, courses) => {
+      if (err) return callback(500, { message: "Error: " + err.message });
+      callback(200, courses);
+    });
+  } else {
+    callback(405);
+  }
+};
 
 // Define the login route handler
 // It handles user login by verifying the email and password
@@ -199,6 +226,7 @@ handlers.login = (data, callback) => {
     if (err || !user) return callback(401, { message: "Invalid email or password" });
 
     bcrypt.compare(password, user.password, (err, isMatch) => {
+      console.log(err, isMatch);
       if (err || !isMatch) return callback(401, { message: "Invalid email or password" });
 
       const token = jwt.sign({ id: user.id, email: user.email }, secretKey, { expiresIn: "1h" });

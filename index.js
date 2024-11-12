@@ -13,6 +13,7 @@ let router = {
   pte: handlers.pte,
   requirements: handlers.requirements,
   allUniversities: handlers.allUniversities,
+  allCourses: handlers.allCourses,
   users: handlers.users,
   login: handlers.login,
   logout: handlers.logout,
