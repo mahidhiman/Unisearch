@@ -27,6 +27,11 @@ db.serialize(() => {
     )`);
 
   // Create course table
+  /*
+   * @todo Add duration of the course
+   * @Todo Add name of the course
+   */
+
   db.run(`CREATE TABLE IF NOT EXISTS course (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL,

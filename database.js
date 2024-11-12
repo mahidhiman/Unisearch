@@ -40,7 +40,7 @@ const validateUniversity = (university) => {
   const requiredFields = [
     "name",
     "country",
-    "campusName",
+    "campus_name",
     "city",
     "scholarships",
     "description",
@@ -54,7 +54,6 @@ const validateUniversity = (university) => {
 
   if (!/^\d+$/.test(university.scholarships)) return "Scholarships must be a number";
   if (!/^\d+$/.test(university.rank)) return "Rank must be a number";
-  if (!/^https?:\/\/.+\..+/.test(university.image)) return "Image must be a valid URL";
   if (!["yes", "no"].includes(university.MOI_Accepted)) return "MOI_Accepted must be 'yes' or 'no'";
   if (!["yes", "no"].includes(university.IELTS_waiver)) return "IELTS_waiver must be 'yes' or 'no'";
 
@@ -62,7 +61,25 @@ const validateUniversity = (university) => {
 };
 
 // Placeholder for course validation logic
-const validateCourse = (course) => true;
+const validateCourse = (course) => {
+  const requiredFields = [
+    "university_id",
+    "name",
+    "image",
+    "level_of_course",
+    "requirement_id",
+    "ielts_waiver",
+    "moi_accepted",
+    "link",
+  ];
+  const validationError = validateFields(course, requiredFields);
+  if (validationError) return validationError;
+
+  if (!["yes", "no"].includes(course.ielts_waiver)) return "IELTS waiver must be 'yes' or 'no'";
+  if (!["yes", "no"].includes(course.moi_accepted)) return "MOI accepted must be 'yes' or 'no'";
+
+  return null;
+};
 
 // Execute a SQL query that modifies data
 const runQuery = (sql, params, callback) =>
@@ -94,7 +111,7 @@ const createUniversity = (university, callback) => {
     [
       university.name,
       university.country,
-      university.campusName,
+      university.campus_name,
       university.city,
       university.scholarships,
       university.description,
@@ -135,8 +152,17 @@ const createCourse = (course, callback) => {
   const validationError = validateCourse(course);
   if (validationError) return callback(new Error(validationError));
   runQuery(
-    "INSERT INTO courses (university_id, name, requirement_id, fees, duration, intake, link) VALUES (?, ?, ?, ?, ?, ?, ?)",
-    [course.university_id, course.name, course.requirement_id, course.fees, course.duration, course.intake, course.link],
+    "INSERT INTO course (university_id, name, image, level_of_course, requirement_id, ielts_waiver, moi_accepted, link) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+    [
+      course.university_id,
+      course.name,
+      course.image,
+      course.level_of_course,
+      course.requirement_id,
+      course.ielts_waiver,
+      course.moi_accepted,
+      course.link,
+    ],
     callback
   );
 };
@@ -146,8 +172,18 @@ const updateCourse = (id, course, callback) => {
   const validationError = validateCourse(course);
   if (validationError) return callback(new Error(validationError));
   runQuery(
-    "UPDATE courses SET university_id = ?, name = ?, description = ?, duration = ?, credits = ? WHERE id = ?",
-    [course.university_id, course.name, course.description, course.duration, course.credits, id],
+    "UPDATE courses SET university_id = ?, name = ?, image = ?, level_of_course = ?, requirement_id = ?, ielts_waiver = ?, moi_accepted = ?, link = ? WHERE id = ?",
+    [
+      course.university_id,
+      course.name,
+      course.image,
+      course.level_of_course,
+      course.requirement_id,
+      course.ielts_waiver,
+      course.moi_accepted,
+      course.link,
+      id,
+    ],
     callback
   );
 };
@@ -218,6 +254,15 @@ const updateUser = (id, user, callback) => {
   );
 };
 
+// Create a new requirement record
+const createRequirements = (requirement, callback) => {
+  runQuery(
+    "INSERT INTO requirements (requirement, ielts_id, pte_id) VALUES (?, ?, ?)",
+    [requirement.requirement, requirement.ielts_id, requirement.pte_id],
+    callback
+  );
+};
+
 // Delete an entity by ID
 const deleteEntity = (table, id, callback) => runQuery(`DELETE FROM ${table} WHERE id = ?`, [id], callback);
 
@@ -226,27 +271,31 @@ const getEntityById = (table, id, callback) => getQuery(`SELECT * FROM ${table} 
 
 // Get all courses with related university and requirement details
 const getCourses = (callback) => {
+  /**
+   * Retrieves course information along with associated university and requirements details.
+   *
+   * The query selects the following fields:
+   * - courses.name: The name of the course.
+   * - courses.image: The image associated with the course.
+   * - courses.level_of_course: The level of the course.
+   * - courses.ielts_waiver: Indicates if an IELTS waiver is available for the course.
+   * - requirement_id: The ID of the requirement associated with the course.
+   * - courses.moi_accepted: Indicates if the medium of instruction is accepted.
+   * - courses.link: The link to the course details.
+   *
+   * The query joins the following tables:
+   * - university: To get the university details associated with the course.
+   * - requirements: To get the requirements details associated with the course.
+   * - ielts (left join): To get the IELTS details if available.
+   * - pte (left join): To get the PTE details if available.
+   */
   const sql = `
-    SELECT 
-      course.id AS course_id, 
-      course.name AS course_name, 
-      university.name AS university_name, 
-      university.country AS university_country, 
-      university.campus_name AS university_campus_name, 
-      university.city AS university_city, 
-      requirements.requirement AS course_requirement, 
-      ielts.score AS ielts_score, 
-      pte.score AS pte_score
-    FROM 
-      course
-    JOIN 
-      university ON course.university_id = university.id
-    LEFT JOIN 
-      requirements ON course.id = requirements.course_id
-    LEFT JOIN 
-      ielts ON course.id = ielts.course_id
-    LEFT JOIN 
-      pte ON course.id = pte.course_id
+  SELECT course.name, course.image, course.level_of_course, course.ielts_waiver, requirement_id, course.moi_accepted, course.link 
+  FROM course 
+  JOIN university ON course.university_id = university.id 
+  JOIN requirements ON course.requirement_id = requirements.id 
+  LEFT JOIN ielts ON requirements.ielts_id = ielts.id 
+  LEFT JOIN pte ON requirements.pte_id = pte.id
   `;
   allQuery(sql, [], callback);
 };
@@ -271,6 +320,7 @@ module.exports = {
   updateIelts,
   deleteIelts: (id, callback) => deleteEntity("ielts", id, callback),
   createPte,
+  createRequirements,
   getPteById: (id, callback) => getEntityById("pte", id, callback),
   updatePte,
   deletePte: (id, callback) => deleteEntity("pte", id, callback),
