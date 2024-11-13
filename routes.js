@@ -24,7 +24,7 @@ const isTokenInBlacklist = (token) => {
 const verifyToken = (token) => {
   try {
     return jwt.verify(token, secretKey);
-  } catch {
+  } catch (error) {
     return null;
   }
 };
@@ -32,7 +32,7 @@ const verifyToken = (token) => {
 // Function to check access control by verifying the token
 // If the token is missing or invalid, it returns a 401 Unauthorized response
 const checkAccessControl = (data, callback) => {
-  const token = data.headers.token;
+  const token = data.headers?.token;
   if (!token) {
     callback(401, { message: "Missing token" });
     return false;
@@ -56,7 +56,7 @@ const checkAccessControl = (data, callback) => {
     }
 
     data.user = user;
-    return true;
+    callback(null, true);
   });
 };
 
@@ -64,7 +64,11 @@ const checkAccessControl = (data, callback) => {
 // If the method is POST, PUT, or DELETE, it checks access control
 // If access control fails, it does not proceed to the next handler
 const enforceAccessControl = (data, callback, next) => {
-  if (["post", "put", "delete"].includes(data.method) && !checkAccessControl(data, callback)) return;
+  const methodsRequiringAccessControl = ["post", "put", "delete"];
+  const isMethodRequiringAccessControl = methodsRequiringAccessControl.includes(data.method);
+  const isAccessControlFailed = !checkAccessControl(data, callback);
+
+  if (isMethodRequiringAccessControl && isAccessControlFailed) return;
   next();
 };
 
@@ -96,13 +100,13 @@ const handleRoute = (data, callback, subHandlers) => {
   else callback(405);
 };
 
-// Function to create a handler for CRUD operations
-// It defines handlers for POST, GET, PUT, and DELETE methods
-// Each handler performs input validation and interacts with the database
 const createHandler = (entity, validateInput) => ({
   post: (data, callback) => {
     const payload = data.payload || {};
-    if (!validateInput(payload)) return callback(400, { message: "Invalid input" });
+    if (!validateInput(payload)) {
+      callback(400, { message: "Invalid input" });
+      return;
+    }
     database[`create${entity}`](payload, (err, id) =>
       handleDatabaseResponse(err, id, callback, `${entity} created successfully`)
     );
@@ -129,12 +133,13 @@ const createHandler = (entity, validateInput) => ({
     database[`delete${entity}`](id, (err) => handleDatabaseResponse(err, null, callback, `${entity} deleted successfully`));
   },
 });
-
 // Function to apply access control to specific routes
 // It wraps the handlers of the specified routes with access control
 const applyAccessControl = () => {
   ["_universities", "_course", "_ielts", "_pte", "_requirements"].forEach((route) => {
-    handlers[route] = wrapWithAccessControl(handlers[route]);
+    if (handlers[route]) {
+      handlers[route] = wrapWithAccessControl(handlers[route]);
+    }
   });
 };
 
@@ -274,19 +279,29 @@ handlers.login = (data, callback) => {
 // It handles user logout by adding the token to the blacklist
 // If the token is missing, it returns a 400 Bad Request response
 handlers.logout = (data, callback) => {
-  if (data.method !== "post") return callback(405, { message: "Method not allowed" });
+  if (data.method !== "post") {
+    return callback(405, { message: "Method not allowed" });
+  }
+
   const token = data.headers.token;
-  if (!token) return callback(400, { message: "Missing token" });
+  if (!token) {
+    return callback(400, { message: "Missing token" });
+  }
 
-  // Check if the token is in the blacklist
-  if (isTokenInBlacklist(token)) return callback(200, { message: "user has already been logedout" });
+  if (isTokenInBlacklist(token)) {
+    return callback(200, { message: "User has already been logged out" });
+  }
 
-  // Verify token
-  if (verifyToken(token) === null) return callback(401, { message: "Invalid token" });
+  if (verifyToken(token) === null) {
+    return callback(401, { message: "Invalid token" });
+  }
 
   const decodedToken = jwt.decode(token);
-  if (decodedToken && decodedToken.exp) tokenBlacklist.set(token, decodedToken.exp * 1000);
-  callback(200, { message: "Logout successful" });
+  if (decodedToken && decodedToken.exp) {
+    tokenBlacklist.set(token, decodedToken.exp * 1000);
+  }
+
+  return callback(200, { message: "Logout successful" });
 };
 
 // Periodically clean up expired tokens from the blacklist
@@ -301,4 +316,5 @@ setInterval(() => {
 // Apply access control to the specified routes
 applyAccessControl();
 
+// Export handlers to be used in other parts of the application
 module.exports = { handlers };
