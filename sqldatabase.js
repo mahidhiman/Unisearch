@@ -39,6 +39,8 @@ db.serialize(() => {
         level_of_course TEXT CHECK(level_of_course IN ('MSc', 'BSc', 'BA', 'IY1', 'Foundation', 'Pre-masters')) NOT NULL,
         requirement_id INTEGER,
         university_id INTEGER,
+        fees INTEGER NOT NULL,
+        duration INTEGER NOT NULL,
         ielts_waiver TEXT CHECK(ielts_waiver IN ('yes', 'no')) NOT NULL,
         moi_accepted TEXT CHECK(moi_accepted IN ('yes', 'no')) NOT NULL,
         link TEXT NOT NULL CHECK(link LIKE 'http%' OR link LIKE 'https%'),

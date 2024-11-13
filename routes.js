@@ -33,11 +33,31 @@ const verifyToken = (token) => {
 // If the token is missing or invalid, it returns a 401 Unauthorized response
 const checkAccessControl = (data, callback) => {
   const token = data.headers.token;
-  if (!token || isTokenInBlacklist(token)) {
-    callback(401, { message: "Unauthorized" });
+  if (!token) {
+    callback(401, { message: "Missing token" });
     return false;
   }
-  return true;
+
+  if (isTokenInBlacklist(token)) {
+    callback(401, { message: "You're logged out" });
+    return false;
+  }
+
+  const decodedToken = verifyToken(token);
+  if (!decodedToken) {
+    callback(401, { message: "Invalid token" });
+    return false;
+  }
+
+  database.getUserByEmail(decodedToken.email, (err, user) => {
+    if (err || !user) {
+      callback(401, { message: "Unauthorised!" });
+      return false;
+    }
+
+    data.user = user;
+    return true;
+  });
 };
 
 // Function to enforce access control for certain HTTP methods
@@ -82,7 +102,6 @@ const handleRoute = (data, callback, subHandlers) => {
 const createHandler = (entity, validateInput) => ({
   post: (data, callback) => {
     const payload = data.payload || {};
-    console.log(validateInput, validateInput(payload), payload, "hello world");
     if (!validateInput(payload)) return callback(400, { message: "Invalid input" });
     database[`create${entity}`](payload, (err, id) =>
       handleDatabaseResponse(err, id, callback, `${entity} created successfully`)
@@ -213,6 +232,24 @@ handlers.allCourses = (data, callback) => {
   }
 };
 
+//Define handlers for returning all the data available in a perticular table from the database
+handlers.allUniversitiesNames = (data, callback) => {
+  if (data.method !== "get") return callback(405);
+  database.getAll(
+    "university",
+    (err, universities) => {
+      if (err) return callback(500, { message: "Error: " + err.message });
+      callback(
+        200,
+        universities.map(({ id, name, campus_name }) => ({ id, name: `${name}-${campus_name}` }))
+      );
+    },
+    "id",
+    "name",
+    "campus_name"
+  );
+};
+
 // Define the login route handler
 // It handles user login by verifying the email and password
 // If the credentials are valid, it generates a JWT token and returns it
@@ -222,11 +259,9 @@ handlers.login = (data, callback) => {
   if (!email || !password) return callback(400, { message: "Missing email or password" });
 
   database.getUserByEmail(email, (err, user) => {
-    console.log(err, user);
     if (err || !user) return callback(401, { message: "Invalid email or password" });
 
     bcrypt.compare(password, user.password, (err, isMatch) => {
-      console.log(err, isMatch);
       if (err || !isMatch) return callback(401, { message: "Invalid email or password" });
 
       const token = jwt.sign({ id: user.id, email: user.email }, secretKey, { expiresIn: "1h" });
@@ -239,9 +274,15 @@ handlers.login = (data, callback) => {
 // It handles user logout by adding the token to the blacklist
 // If the token is missing, it returns a 400 Bad Request response
 handlers.logout = (data, callback) => {
-  if (data.method !== "post") return callback(405);
+  if (data.method !== "post") return callback(405, { message: "Method not allowed" });
   const token = data.headers.token;
   if (!token) return callback(400, { message: "Missing token" });
+
+  // Check if the token is in the blacklist
+  if (isTokenInBlacklist(token)) return callback(200, { message: "user has already been logedout" });
+
+  // Verify token
+  if (verifyToken(token) === null) return callback(401, { message: "Invalid token" });
 
   const decodedToken = jwt.decode(token);
   if (decodedToken && decodedToken.exp) tokenBlacklist.set(token, decodedToken.exp * 1000);

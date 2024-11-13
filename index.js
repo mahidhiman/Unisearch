@@ -17,6 +17,7 @@ let router = {
   users: handlers.users,
   login: handlers.login,
   logout: handlers.logout,
+  allUniName: handlers.allUniversitiesNames,
 };
 
 /**

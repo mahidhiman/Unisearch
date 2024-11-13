@@ -67,6 +67,8 @@ const validateCourse = (course) => {
     "name",
     "image",
     "level_of_course",
+    "duration",
+    "fees",
     "requirement_id",
     "ielts_waiver",
     "moi_accepted",
@@ -152,13 +154,15 @@ const createCourse = (course, callback) => {
   const validationError = validateCourse(course);
   if (validationError) return callback(new Error(validationError));
   runQuery(
-    "INSERT INTO course (university_id, name, image, level_of_course, requirement_id, ielts_waiver, moi_accepted, link) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+    "INSERT INTO course (university_id, name, image, level_of_course, fees, duration, requirement_id, ielts_waiver, moi_accepted, link) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
     [
       course.university_id,
       course.name,
       course.image,
       course.level_of_course,
       course.requirement_id,
+      course.fees,
+      course.duration,
       course.ielts_waiver,
       course.moi_accepted,
       course.link,
@@ -172,12 +176,14 @@ const updateCourse = (id, course, callback) => {
   const validationError = validateCourse(course);
   if (validationError) return callback(new Error(validationError));
   runQuery(
-    "UPDATE courses SET university_id = ?, name = ?, image = ?, level_of_course = ?, requirement_id = ?, ielts_waiver = ?, moi_accepted = ?, link = ? WHERE id = ?",
+    "UPDATE courses SET university_id = ?, name = ?, image = ?, duration = ?, fees = ?, level_of_course = ?, requirement_id = ?, ielts_waiver = ?, moi_accepted = ?, link = ? WHERE id = ?",
     [
       course.university_id,
       course.name,
       course.image,
       course.level_of_course,
+      course.duration,
+      course.fees,
       course.requirement_id,
       course.ielts_waiver,
       course.moi_accepted,
@@ -290,7 +296,7 @@ const getCourses = (callback) => {
    * - pte (left join): To get the PTE details if available.
    */
   const sql = `
-  SELECT course.name, course.image, course.level_of_course, course.ielts_waiver, requirement_id, course.moi_accepted, course.link 
+  SELECT course.name, course.image, course.level_of_course, course.ielts_waiver, course.duration, course.fees, requirement_id, course.moi_accepted, course.link 
   FROM course 
   JOIN university ON course.university_id = university.id 
   JOIN requirements ON course.requirement_id = requirements.id 
@@ -302,6 +308,13 @@ const getCourses = (callback) => {
 
 // Search for courses by name
 const searchCourse = (name, callback) => allQuery("SELECT * FROM courses WHERE name LIKE ?", ["%" + name + "%"], callback);
+
+//get all common routes
+//through this we can get all data available in one entity
+const getAll = (entity, callback, ...columns) => {
+  const sql = `SELECT ${columns.join(",")} FROM ${entity}`;
+  allQuery(sql, [], callback);
+};
 
 // Export functions for external use
 module.exports = {
@@ -328,5 +341,6 @@ module.exports = {
   deleteUser: (id, callback) => deleteEntity("users", id, callback),
   updateUser,
   searchCourse,
+  getAll,
   getUserByEmail: (email, callback) => getQuery("SELECT * FROM users WHERE email = ?", [email], callback),
 };
