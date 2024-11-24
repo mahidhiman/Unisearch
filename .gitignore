@@ -2,4 +2,4 @@ sqldatabase.js
 university.db
 .env
 config.json
-university.db
+node_modules/

@@ -28,9 +28,72 @@ const validateFields = (fields) => {
   return Object.keys(validFields).length > 0 ? validFields : null;
 };
 
+//validating course inputs
+const validateCourseInput = ({
+  name,
+  image,
+  level_of_course,
+  requirement_id,
+  university_id,
+  fees,
+  duration,
+  ielts_waiver,
+  moi_accepted,
+  link,
+}) => {
+  const urlRegex = /^(https?|chrome):\/\/[^\s$.?#].[^\s]*$/;
+  console.log("validation ran for course input");
+  //check if all fields are valid
+  return (
+    [name, level_of_course, requirement_id, university_id, ielts_waiver, moi_accepted, link].every(
+      (field) => typeof field === "string" && field.trim().length > 0
+    ) &&
+    typeof fees === "number" &&
+    fees >= 0 &&
+    typeof duration === "number" &&
+    duration > 0 &&
+    urlRegex.test(image) &&
+    urlRegex.test(link)
+  );
+};
+
+// validating university inputs
+const validateUniversityInput = ({
+  name,
+  campus_name,
+  city,
+  country,
+  scholorships,
+  link,
+  application_fee,
+  image,
+  poc,
+  deadline_application,
+  deadline_fees,
+  rank,
+}) => {
+  const urlRegex = /^(https?|chrome):\/\/[^\s$.?#].[^\s]*$/;
+  console.log("validation ran for university input");
+  // check if all fields are valid
+  return (
+    [name, country, campus_name, city, scholorships, link, poc].every(
+      (field) => typeof field === "string" && field.trim().length > 0
+    ) &&
+    typeof application_fee === "number" &&
+    application_fee >= 0 &&
+    typeof rank === "number" &&
+    rank > 0 &&
+    urlRegex.test(image) &&
+    urlRegex.test(link) &&
+    deadline_application instanceof Date &&
+    deadline_fees instanceof Date
+  );
+};
+
 //export helper functions
 module.exports = {
   validateUserInput,
   validateId,
   validateFields,
+  validateUniversityInput,
 };

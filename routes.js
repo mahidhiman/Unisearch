@@ -49,15 +49,7 @@ const checkAccessControl = (data, callback) => {
     return false;
   }
 
-  database.getUserByEmail(decodedToken.email, (err, user) => {
-    if (err || !user) {
-      callback(401, { message: "Unauthorised!" });
-      return false;
-    }
-
-    data.user = user;
-    callback(null, true);
-  });
+  return true;
 };
 
 // Function to enforce access control for certain HTTP methods
@@ -97,7 +89,7 @@ const handleDatabaseResponse = (err, result, callback, successMessage) => {
 const handleRoute = (data, callback, subHandlers) => {
   const method = subHandlers[data.method];
   if (method) method(data, callback);
-  else callback(405);
+  else callback(405, { message: "Method not allowed" });
 };
 
 const createHandler = (entity, validateInput) => ({
@@ -154,11 +146,7 @@ handlers.root = (data, callback) => {
 // Define the university route handler
 // It delegates the request to the appropriate method handler in handlers._universities
 handlers.university = (data, callback) => handleRoute(data, callback, handlers._universities);
-handlers._universities = createHandler(
-  "University",
-  ({ name, country, campus_name, city, scholarships, description, image, rank, MOI_Accepted, IELTS_waiver }) =>
-    name && country && campus_name && city && scholarships && description && image && rank && MOI_Accepted && IELTS_waiver
-);
+handlers._universities = createHandler("University", helpers.validateUniversityInput);
 
 // Define the users route handler
 // It delegates the request to the appropriate method handler in handlers._users
@@ -173,7 +161,7 @@ handlers._course = createHandler("Course", helpers.validateFields);
 // Define the requirements route handler
 // It delegates the request to the appropriate method handler in handlers._requirements
 handlers.requirements = (data, callback) => handleRoute(data, callback, handlers._requirements);
-handlers._requirements = createHandler("Requirements", ({ requirement, ielts_id, pte_id }) => requirement && ielts_id && pte_id);
+handlers._requirements = createHandler("Requirements", helpers.validateFields);
 
 // Define the IELTS route handler
 // It delegates the request to the appropriate method handler in handlers._ielts
@@ -222,7 +210,7 @@ handlers.searchCourses = (data, callback) => {
 
 // Define the not found route handler
 // It returns a 404 Not Found response for any unmatched routes
-handlers.notFound = (data, callback) => callback(404, { message: "Not found" });
+handlers.notFound = (_, callback) => callback(404, { message: "Not found" });
 
 //Define the allCourses route
 //it returns all the courses available in the database
@@ -260,6 +248,7 @@ handlers.allUniversitiesNames = (data, callback) => {
 // If the credentials are valid, it generates a JWT token and returns it
 handlers.login = (data, callback) => {
   if (data.method !== "post") return callback(405, { message: "Method not allowed" });
+  console.log(data.payload);
   const { email, password } = data.payload || {};
   if (!email || !password) return callback(400, { message: "Missing email or password" });
 

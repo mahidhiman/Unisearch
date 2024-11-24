@@ -106,21 +106,24 @@ const allQuery = (sql, params, callback) =>
 
 // Create a new university record
 const createUniversity = (university, callback) => {
+  console.log(university);
   const validationError = validateUniversity(university);
   if (validationError) return callback(new Error(validationError));
   runQuery(
-    "INSERT INTO university (name, country, campus_name, city, scholarships, description, image, rank, MOI_Accepted, IELTS_waiver) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+    "INSERT INTO university (name, campus_name, city, country, scholorships, link, application_fee, image, poc, deadline_application, deadline_fees, rank) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
     [
       university.name,
-      university.country,
-      university.campus_name,
+      university.campusName,
       university.city,
+      university.country,
       university.scholarships,
-      university.description,
+      university.link,
+      university.application_fee,
       university.image,
+      university.poc,
+      university.deadline_application,
+      university.deadline_fees,
       university.rank,
-      university.MOI_Accepted,
-      university.IELTS_waiver,
     ],
     callback
   );
@@ -131,18 +134,20 @@ const updateUniversity = (id, university, callback) => {
   const validationError = validateUniversity(university);
   if (validationError) return callback(new Error(validationError));
   runQuery(
-    "UPDATE university SET name = ?, country = ?, campus_name = ?, city = ?, scholarships = ?, description = ?, image = ?, rank = ?, MOI_Accepted = ?, IELTS_waiver = ? WHERE id = ?",
+    "UPDATE university SET name = ?, campus_name = ?, city = ?, country = ?, scholorships = ?, link = ?, application_fee = ?, image = ?, poc = ?, deadline_application = ? , deadline_fees = ?, rank = ?, where id = ?",
     [
       university.name,
-      university.country,
       university.campusName,
       university.city,
+      university.country,
       university.scholarships,
-      university.description,
+      university.link,
+      university.application_fee,
       university.image,
+      university.poc,
+      university.deadline_application,
+      university.deadline_fees,
       university.rank,
-      university.MOI_Accepted,
-      university.IELTS_waiver,
       id,
     ],
     callback
@@ -154,13 +159,13 @@ const createCourse = (course, callback) => {
   const validationError = validateCourse(course);
   if (validationError) return callback(new Error(validationError));
   runQuery(
-    "INSERT INTO course (university_id, name, image, level_of_course, fees, duration, requirement_id, ielts_waiver, moi_accepted, link) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+    "INSERT INTO course (name, image, level_of_course, requirement_id, university_id, fees, duration, ielts_waiver, moi_accepted, link) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
     [
-      course.university_id,
       course.name,
       course.image,
       course.level_of_course,
       course.requirement_id,
+      course.university_id,
       course.fees,
       course.duration,
       course.ielts_waiver,

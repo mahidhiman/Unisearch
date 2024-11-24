@@ -14,29 +14,25 @@ db.serialize(() => {
   db.run(`CREATE TABLE IF NOT EXISTS university (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT NOT NULL,
-            description TEXT NOT NULL,
-            scholarships TEXT, -- This will store a comma-separated list of scholarships
-            rank INTEGER NOT NULL,
-            image TEXT, -- This can be null
-            moi_accepted TEXT CHECK(moi_accepted IN ('yes', 'no')) NOT NULL,
-            ielts_waiver TEXT CHECK(ielts_waiver IN ('yes', 'no')) NOT NULL,
             campus_name TEXT NOT NULL,
             city TEXT NOT NULL,
             country TEXT NOT NULL,
+            scholorships TEXT NOT NULL,
+            link TEXT NOT NULL CHECK(link LIKE 'http%' OR link LIKE 'https%'),
+            application_fee Double,
+            image TEXT,
+            poc TEXT,
+            deadline_application DATE,
+            deadline_fees DATE,
+            rank INTEGER NOT NULL,
             created_on DATETIME DEFAULT CURRENT_TIMESTAMP
     )`);
-
-  // Create course table
-  /*
-   * @todo Add duration of the course
-   * @Todo Add name of the course
-   */
-
+  // Create packages table
   db.run(`CREATE TABLE IF NOT EXISTS course (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL,
         image TEXT,
-        level_of_course TEXT CHECK(level_of_course IN ('MSc', 'BSc', 'BA', 'IY1', 'Foundation', 'Pre-masters')) NOT NULL,
+        level_of_course TEXT CHECK(level_of_course IN ('MSc', 'MA', 'BSc', 'BA', 'IY1', 'Foundation', 'Pre-masters')) NOT NULL,
         requirement_id INTEGER,
         university_id INTEGER,
         fees INTEGER NOT NULL,
@@ -104,12 +100,15 @@ db.serialize(() => {
     )`);
   //create students table
   db.run(`CREATE TABLE IF NOT EXISTS students (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        user_id INTEGER,
+        user_id TEXT NOT NULL UNIQUE CHECK(user_id LIKE '[A-Z0-9]%') PRIMARY KEY,
+        name TEXT NOT NULL,
         email TEXT NOT NULL,
         phone TEXT NOT NULL,
-        created_on DATETIME DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (user_id) REFERENCES users(id)
+        date_of_birth DATE NOT NULL,
+        package_id INTEGER,
+        image TEXT check(image LIKE 'http%' OR image LIKE 'https%'),
+        documents TEXT,
+        created_on DATETIME DEFAULT CURRENT_TIMESTAMP
     )`);
 });
 

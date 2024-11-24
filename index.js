@@ -3,7 +3,6 @@ const url = require("url");
 const { handlers } = require("./routes");
 const stringDecoder = require("string_decoder").StringDecoder;
 const querystring = require("querystring");
-
 // Define the router with available routes
 let router = {
   course: handlers.course,
@@ -85,10 +84,13 @@ const server = http.createServer((req, res) => {
     // Enable CORS for all routes
     res.setHeader("Access-Control-Allow-Origin", "*");
     res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-    res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+    res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, token");
+    res.setHeader("Access-Control-Allow-Credentials", "true");
 
     // Handle preflight requests
     if (method === "options") {
+      console.log("OPTIONS request received");
+
       res.writeHead(200);
       res.end();
       return;
@@ -111,7 +113,6 @@ const server = http.createServer((req, res) => {
       statusCode = typeof statusCode === "number" ? statusCode : 200;
       payload = typeof payload === "object" ? payload : {};
       const payloadString = JSON.stringify(payload);
-
       // Set the response headers and send the response
       res.setHeader("Content-Type", "application/json");
       res.writeHead(statusCode);
@@ -121,6 +122,6 @@ const server = http.createServer((req, res) => {
 });
 
 // Start the server and listen on port 3000
-server.listen(3000, () => {
-  console.log("Server is listening on port 3000");
+server.listen(3001, () => {
+  console.log("Server is listening on port 3001");
 });
