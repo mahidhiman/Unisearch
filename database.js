@@ -39,23 +39,27 @@ const validatePte = (pte) => {
 const validateUniversity = (university) => {
   const requiredFields = [
     "name",
-    "country",
     "campus_name",
     "city",
+    "country",
     "scholarships",
-    "description",
+    "link",
+    "application_fee",
     "image",
+    "poc",
+    "deadline_application",
+    "deadline_fees",
     "rank",
-    "MOI_Accepted",
-    "IELTS_waiver",
   ];
   const validationError = validateFields(university, requiredFields);
   if (validationError) return validationError;
 
   if (!/^\d+$/.test(university.scholarships)) return "Scholarships must be a number";
   if (!/^\d+$/.test(university.rank)) return "Rank must be a number";
-  if (!["yes", "no"].includes(university.MOI_Accepted)) return "MOI_Accepted must be 'yes' or 'no'";
-  if (!["yes", "no"].includes(university.IELTS_waiver)) return "IELTS_waiver must be 'yes' or 'no'";
+  if (isNaN(Date.parse(university.deadline_application))) return "Application deadline must be a valid date";
+  if (isNaN(Date.parse(university.deadline_fees))) return "Fees deadline must be a valid date";
+  if (!/^https?:\/\/[^\s$.?#].[^\s]*$/.test(university.image)) return "Invalid image URL";
+  if (!/^https?:\/\/[^\s$.?#].[^\s]*$/.test(university.link)) return "Invalid link URL";
 
   return null;
 };
@@ -110,10 +114,10 @@ const createUniversity = (university, callback) => {
   const validationError = validateUniversity(university);
   if (validationError) return callback(new Error(validationError));
   runQuery(
-    "INSERT INTO university (name, campus_name, city, country, scholorships, link, application_fee, image, poc, deadline_application, deadline_fees, rank) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+    "INSERT INTO university (name, campus_name, city, country, scholorships, link, application_fee, image, poc, deadline_application, deadline_fees, rank) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
     [
       university.name,
-      university.campusName,
+      university.campus_name,
       university.city,
       university.country,
       university.scholarships,
@@ -134,7 +138,7 @@ const updateUniversity = (id, university, callback) => {
   const validationError = validateUniversity(university);
   if (validationError) return callback(new Error(validationError));
   runQuery(
-    "UPDATE university SET name = ?, campus_name = ?, city = ?, country = ?, scholorships = ?, link = ?, application_fee = ?, image = ?, poc = ?, deadline_application = ? , deadline_fees = ?, rank = ?, where id = ?",
+    "UPDATE university SET name = ?, campus_name = ?, city = ?, country = ?, scholarships = ?, link = ?, application_fee = ?, image = ?, poc = ?, deadline_application = ? , deadline_fees = ?, rank = ?, where id = ?",
     [
       university.name,
       university.campusName,

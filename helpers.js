@@ -58,42 +58,107 @@ const validateCourseInput = ({
 };
 
 // validating university inputs
-const validateUniversityInput = ({
-  name,
-  campus_name,
-  city,
-  country,
-  scholorships,
-  link,
-  application_fee,
-  image,
-  poc,
-  deadline_application,
-  deadline_fees,
-  rank,
-}) => {
+const validateUniversityInput = (
+  {
+    name,
+    campus_name,
+    city,
+    country,
+    scholarships,
+    link,
+    application_fee,
+    image,
+    poc,
+    deadline_application,
+    deadline_fees,
+    rank,
+    IELTS_waiver,
+    MOI_Accepted,
+  },
+  callabck
+) => {
   const urlRegex = /^(https?|chrome):\/\/[^\s$.?#].[^\s]*$/;
   console.log("validation ran for university input");
   // check if all fields are valid
-  return (
-    [name, country, campus_name, city, scholorships, link, poc].every(
+  results = [];
+
+  [
+    name,
+    campus_name,
+    city,
+    country,
+    scholarships,
+    link,
+    application_fee,
+    image,
+    poc,
+    deadline_application,
+    deadline_fees,
+    rank,
+  ].forEach((field, index, array) => {
+    let fieldNames = [
+      "name",
+      "campus_name",
+      "city",
+      "country",
+      "scholarships",
+      "link",
+      "application_fee",
+      "image",
+      "poc",
+      "deadline_application",
+      "deadline_fees",
+      "rank",
+    ];
+    if (typeof field !== "string" || field.trim().length === 0) {
+      results.push(`Field ${fieldNames[index]} must be a non-empty string, received ${field}, and `);
+    }
+  });
+
+  callabck(results.length < 1 ? false : true, results);
+};
+// validating course inputs with detailed error messages
+const validateCourseInputWithError = ({
+  name,
+  image,
+  level_of_course,
+  requirement_id,
+  university_id,
+  fees,
+  duration,
+  ielts_waiver,
+  moi_accepted,
+  link,
+}) => {
+  const urlRegex = /^(https?|chrome):\/\/[^\s$.?#].[^\s]*$/;
+  console.log("validation ran for course input");
+  if (
+    ![name, level_of_course, requirement_id, university_id, ielts_waiver, moi_accepted, link].every(
       (field) => typeof field === "string" && field.trim().length > 0
-    ) &&
-    typeof application_fee === "number" &&
-    application_fee >= 0 &&
-    typeof rank === "number" &&
-    rank > 0 &&
-    urlRegex.test(image) &&
-    urlRegex.test(link) &&
-    deadline_application instanceof Date &&
-    deadline_fees instanceof Date
-  );
+    )
+  ) {
+    return "All string fields must be non-empty";
+  }
+  if (typeof fees !== "number" || fees < 0) {
+    return "Fees must be a non-negative number";
+  }
+  if (typeof duration !== "number" || duration <= 0) {
+    return "Duration must be a positive number";
+  }
+  if (!urlRegex.test(image)) {
+    return "Image must be a valid URL";
+  }
+  if (!urlRegex.test(link)) {
+    return "Link must be a valid URL";
+  }
+  return true;
 };
 
-//export helper functions
+//export helper functions with detailed error messages
 module.exports = {
   validateUserInput,
   validateId,
   validateFields,
   validateUniversityInput,
+  validateCourseInputWithError,
 };

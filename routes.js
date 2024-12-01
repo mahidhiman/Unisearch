@@ -95,10 +95,12 @@ const handleRoute = (data, callback, subHandlers) => {
 const createHandler = (entity, validateInput) => ({
   post: (data, callback) => {
     const payload = data.payload || {};
-    if (!validateInput(payload)) {
-      callback(400, { message: "Invalid input" });
-      return;
-    }
+    validateInput(payload, (err, results)=>{
+      if(err){
+        callback(400, {message: `${results}`});
+        return;
+      }
+    })
     database[`create${entity}`](payload, (err, id) =>
       handleDatabaseResponse(err, id, callback, `${entity} created successfully`)
     );

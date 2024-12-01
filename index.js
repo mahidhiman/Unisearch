@@ -1,10 +1,12 @@
 const http = require("http");
 const url = require("url");
 const { handlers } = require("./routes");
-const stringDecoder = require("string_decoder").StringDecoder;
+const StringDecoder = require("string_decoder").StringDecoder;
 const querystring = require("querystring");
+const { stat } = require("fs");
+
 // Define the router with available routes
-let router = {
+const router = {
   course: handlers.course,
   notFound: handlers.notFound,
   universities: handlers.university,
@@ -51,6 +53,12 @@ let router = {
  * The handler responds with a status code and a payload object, which are used to construct the response.
  */
 const server = http.createServer((req, res) => {
+  // Enable CORS for all routes
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, token");
+  res.setHeader("Access-Control-Allow-Credentials", "true");
+
   // Parse the incoming request URL
   const parsedUrl = url.parse(req.url, true);
 
@@ -68,7 +76,7 @@ const server = http.createServer((req, res) => {
   const headers = req.headers;
 
   // Initialize the string decoder for the payload
-  const decoder = new stringDecoder("utf-8");
+  const decoder = new StringDecoder("utf-8");
   let buffer = "";
 
   // Collect the payload data
@@ -77,24 +85,9 @@ const server = http.createServer((req, res) => {
   });
 
   // End the payload collection and process the request
-  req.on("end", () => {
+  req.on("end", async () => {
     buffer += decoder.end();
     buffer = querystring.parse(buffer);
-
-    // Enable CORS for all routes
-    res.setHeader("Access-Control-Allow-Origin", "*");
-    res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-    res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, token");
-    res.setHeader("Access-Control-Allow-Credentials", "true");
-
-    // Handle preflight requests
-    if (method === "options") {
-      console.log("OPTIONS request received");
-
-      res.writeHead(200);
-      res.end();
-      return;
-    }
 
     // Choose the appropriate handler for the request
     const chosenHandler = typeof router[trimmedPath] !== "undefined" ? router[trimmedPath] : router.notFound;
@@ -108,20 +101,30 @@ const server = http.createServer((req, res) => {
       payload: buffer,
     };
 
-    // Call the handler and construct the response
-    chosenHandler(data, (statusCode, payload) => {
-      statusCode = typeof statusCode === "number" ? statusCode : 200;
-      payload = typeof payload === "object" ? payload : {};
-      const payloadString = JSON.stringify(payload);
-      // Set the response headers and send the response
-      res.setHeader("Content-Type", "application/json");
-      res.writeHead(statusCode);
-      res.end(payloadString);
-    });
+    //resolve options request
+    if (method === "options") {
+      res.writeHead(200);
+      res.end();
+      return;
+    } else {
+      // Call the handler and construct the response
+      chosenHandler(data, (statusCode, payload) => {
+        console.log("payload", payload, "statusCode", statusCode, method, "respose headers", res.getHeaders());
+        statusCode = typeof statusCode === "number" ? statusCode : 200;
+        payload = typeof payload === "object" ? payload : {};
+        const payloadString = JSON.stringify(payload);
+        // Set the response headers and send the response
+        res.setHeader("Content-Type", "application/json");
+        res.writeHead(statusCode);
+        res.write(payloadString);
+        res.end();
+        return;
+      });
+    }
   });
 });
 
-// Start the server and listen on port 3000
+// Server is listening on port 3001
 server.listen(3001, () => {
   console.log("Server is listening on port 3001");
 });
